@@ -1,6 +1,5 @@
 package com.Vshows.PKI;
 
-import android.app.AppComponentFactory;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,17 +12,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-
+import android.widget.Toast;
+import com.Vshows.PKI.util.JniUtils;
 import com.Vshows.PKI.util.StringToPKey;
 import com.Vshows.PKI.util.SystemUtil;
 import com.Vshows.PKI.util.URLUtil;
 import com.Vshows.PKI.util.keyManager;
-
 import java.security.PublicKey;
-
 import io.tomahawkd.pki.api.client.Connecter;
-import io.tomahawkd.pki.api.client.util.SecurityFunctions;
-import io.tomahawkd.pki.api.client.util.Utils;
+
 
 public class welcome extends AppCompatActivity {
     private ImageView welcome;
@@ -56,8 +53,6 @@ public class welcome extends AppCompatActivity {
                     PublicKey SPub = StringToPKey.getPublicKey(Spub);
                     Log.d("SpublicKey",SPub.toString());
 
-//                    String Tpub = Utils.base64Encode(SecurityFunctions.generateKeyPair().getPublic().getEncoded());
-//                    String Spub = Utils.base64Encode(SecurityFunctions.generateKeyPair().getPublic().getEncoded());
                     manager.restoreServerKey(context,Tpub,Spub);
 
                 }catch (Exception e){
@@ -73,14 +68,22 @@ public class welcome extends AppCompatActivity {
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            getHome();
+            getHome(JniUtils.checkSign(welcome.this));
             super.handleMessage(msg);
         }
     };
 
-    public void getHome(){
-        Intent intent = new Intent(this, Login.class);
-        startActivity(intent);
-        finish();
+    public void getHome(int i){
+        if(i==0){
+            Intent intent = new Intent(this, Login.class);
+            startActivity(intent);
+            finish();
+        }
+        else {
+            Toast.makeText(this,"验证签名失败，服务器已被修改！", Toast.LENGTH_LONG).show();
+            finish();
+
+        }
+
     }
 }

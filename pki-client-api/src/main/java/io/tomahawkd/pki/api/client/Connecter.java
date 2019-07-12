@@ -88,9 +88,7 @@ public class Connecter{
         String[] kp =
                 new String(SecurityFunctions.decryptSymmetric(Kct, iv, Utils.base64Decode(result.get("KP"))))
                         .split(";");
-        System.out.println("KP" + kp[1] + "\n" + kp[0]);
         KeyPair keyPair = SecurityFunctions.readKeysFromString(kp[1], kp[0]);
-        System.out.println(keyPair.getPublic().toString() + "\n" + keyPair.getPrivate().toString());
         // 收到的T
         byte[] T = SecurityFunctions.decryptAsymmetric(keyPair.getPrivate(), Utils.base64Decode(result.get("T")));
         // 转化
@@ -296,11 +294,8 @@ public class Connecter{
         map.put("EToken",EToken);
         map.put("T",T);
         String json = gson.toJson(map);
-
         String res = httpUtil.getJsonData(json,url,ua);
-
-
-        Map<String,String> result = new Gson().fromJson(res,new TypeToken<Map<String,String>>(){}.getType());        //assertThat(result.get("M")).contains("\"status\":0");
+        Map<String,String> result = new Gson().fromJson(res,new TypeToken<Map<String,String>>(){}.getType());
 
         byte[] T1 = SecurityFunctions.decryptAsymmetric(Cpri,Utils.base64Decode(result.get("T")));
         int t1 = ByteBuffer.wrap(T1).order(ByteOrder.LITTLE_ENDIAN).getInt();
@@ -351,9 +346,7 @@ public class Connecter{
         map.put("EToken",EToken);
         map.put("T",T);
         String json = gson.toJson(map);
-
         String res = httpUtil.getJsonData(json,url,ua);
-
         Map<String,String> result = new Gson().fromJson(res,new TypeToken<Map<String,String>>(){}.getType());
 
         byte[] T1 = SecurityFunctions.decryptAsymmetric(Cpri,Utils.base64Decode(result.get("T")));
@@ -410,15 +403,11 @@ public class Connecter{
         map.put("EToken",EToken);
         map.put("T",T);
         String json = gson.toJson(map);
-
         String res = httpUtil.getJsonData(json,url,ua);
 
-
         Map<String,String> result = new Gson().fromJson(res,new TypeToken<Map<String,String>>(){}.getType());
-
         byte[] T1 = SecurityFunctions.decryptAsymmetric(Cpri,Utils.base64Decode(result.get("T")));
         int t1 = ByteBuffer.wrap(T1).order(ByteOrder.LITTLE_ENDIAN).getInt();
-
         String M2 = result.get("M");
 
         Message<List<Map<String, String>>> message = new Gson().fromJson(M2,new TypeToken<Message<List<Map<String, String>>>>(){}.getType());
@@ -535,9 +524,7 @@ public class Connecter{
         map.put("EToken",EToken);
         map.put("T",T);
         String json = gson.toJson(map);
-
         String res = httpUtil.getJsonData(json,url,ua);
-
         Map<String,String> result = new Gson().fromJson(res,new TypeToken<Map<String,String>>(){}.getType());
 
         byte[] T1 = SecurityFunctions.decryptAsymmetric(Cpri,Utils.base64Decode(result.get("T")));
@@ -548,7 +535,6 @@ public class Connecter{
 
         if(t1 == t+1){
             if(message.isOk()){
-
                 Map<String,Object> map3 = new HashMap<>();
                 map3.put("check",0);
                 map3.put("message",message.getMessage());
