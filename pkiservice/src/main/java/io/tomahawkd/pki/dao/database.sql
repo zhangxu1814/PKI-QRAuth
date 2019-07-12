@@ -110,8 +110,15 @@ begin
     where timestampdiff(SECOND, `valid_by`, CURRENT_TIMESTAMP) <= 0;
 end;
 
+create procedure out_of_date_qr()
+begin
+    delete
+    from qrcode_status
+    where timestampdiff(SECOND, `valid_by`, CURRENT_TIMESTAMP) <= 0;
+end;
+
 # event for status update
-create definer = root@localhost event event_auto_cancel_order
+create definer = root@localhost event event_delete_token
     on schedule
         every '1' DAY
             starts '2019-06-27 00:00:00'
@@ -119,3 +126,12 @@ create definer = root@localhost event event_auto_cancel_order
     enable
     do
     call out_of_date();
+
+create definer = root@localhost event event_delete_qr_status
+    on schedule
+        every '1' MINUTE
+            starts '2019-06-27 00:00:00'
+    on completion preserve
+    enable
+    do
+    call out_of_date_qr();
