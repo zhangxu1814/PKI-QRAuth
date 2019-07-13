@@ -62,7 +62,11 @@ public class TokenValidationController {
 	public String tokenInitialization(@RequestBody String data)
 			throws MalformedJsonException, IOException, CipherErrorException {
 
+		ThreadContext.getLogContext().set(systemLogService);
 
+		systemLogService.insertLogRecord(TokenValidationController.class.getName(),
+				"tokenInitialization", SystemLogModel.INFO,
+				"Token initialization start.");
 		Map<String, String> requestMap = Utils.wrapMapFromJson(data, "K", "iv", "id", "T", "D");
 		Map<String, String> responseMap = new HashMap<>();
 
@@ -151,7 +155,7 @@ public class TokenValidationController {
 		String kResponse = Utils.base64Encode(ckp.getPublic().getEncoded());
 
 		String tResponse = Utils.responseChallenge(requestMap.get("T"), spub);
-		ThreadContext.getContext().set(tResponse);
+		ThreadContext.getTimeContext().set(tResponse);
 		String mResponse = new Gson().toJson(new Message<>(0, "Authenticate Complete"));
 
 		systemLogService.insertLogRecord(TokenValidationController.class.getName(),
@@ -187,10 +191,20 @@ public class TokenValidationController {
 	public String tokenValidation(@RequestBody String data)
 			throws MalformedJsonException, IOException, CipherErrorException, NotFoundException {
 
+		systemLogService.insertLogRecord(TokenValidationController.class.getName(),
+				"tokenValidation", SystemLogModel.INFO,
+				"Token validation start.");
+
 		return TokenUtils.tokenValidate(data,
 				systemLogService, tokenService, userLogService,
 				userKeyService, systemKeyService, userIndexService, String.class,
-				(requestMessage, userKeyModel, tokenModel, systemKeyModel, tokenMessage, device, ip) -> null);
+				(requestMessage, userKeyModel, tokenModel, systemKeyModel, tokenMessage, device, ip) -> {
+
+					systemLogService.insertLogRecord(TokenValidationController.class.getName(),
+							"tokenValidation", SystemLogModel.INFO,
+							"User " + tokenModel.getUserId() + " validated");
+					return null;
+				});
 	}
 
 	/**
@@ -213,6 +227,10 @@ public class TokenValidationController {
 	@PostMapping("/deinit")
 	public String tokenRevoke(@RequestBody String data)
 			throws MalformedJsonException, IOException, CipherErrorException, NotFoundException {
+
+		systemLogService.insertLogRecord(TokenValidationController.class.getName(),
+				"tokenRevoke", SystemLogModel.INFO,
+				"Token revoke start.");
 
 		return TokenUtils.tokenValidate(data,
 				systemLogService, tokenService, userLogService,
